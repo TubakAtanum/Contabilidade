@@ -1,44 +1,59 @@
-import * as React from "react";
-import { View, Text, Button } from "react-native";
-import * as XLSX from "xlsx";
-import { read, write } from "xlsx";
-import * as FileSystem from "expo-file-system";
-import * as IntentLauncher from "expo-intent-launcher";
+import React from 'react';
+import { View, Text, Button } from 'react-native';
+import * as FileSystem from 'expo-file-system';
+import { getCurrentDate } from './CreateCSV'
 
-export default function HomeScreen({ navigation }) {
+
+const HomeScreen = ({ navigation }) => {
+  const generateCategoriesFile = async () => {
+    try {
+      // Create the categories.csv file with initial categories
+      const categories = ['Pix', 'Dinheiro', 'Cartão'];
+      const categoriesContent = categories.join(',');
+      const categoriesFileUri = FileSystem.documentDirectory + 'categories.csv';
+      await FileSystem.writeAsStringAsync(categoriesFileUri, categoriesContent);
+
+      // Call the createCSVFile function to generate the data.csv file
+      await createCSVFile();
+
+      alert('CSV files created successfully!');
+    } catch (error) {
+      console.error('Error creating the CSV files:', error);
+    }
+  };
+
+  const createCSVFile = async () => {
+    try {
+      const csvContent = 'Date,Category,Value\n'; 
+      const fileUri = FileSystem.documentDirectory + 'data.csv';
+
+      // Read categories from the categories.csv file
+      const categoriesFileUri = FileSystem.documentDirectory + 'categories.csv';
+      const categoriesContent = await FileSystem.readAsStringAsync(categoriesFileUri);
+      const categories = categoriesContent.split(',');
+  
+      // Create initial entries with all categories
+      const currentDate = getCurrentDate();
+      const initialEntries = categories.map(category => `${currentDate},${category},0\n`);
+      const initialContent = csvContent + initialEntries.join('');
+  
+      await FileSystem.writeAsStringAsync(fileUri, initialContent);
+
+      console.log('CSV content:', initialContent);
+  
+      alert('CSV file created successfully!');
+    } catch (error) {
+      console.error('Error creating the CSV file:', error);
+    }
+  };
+  
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Button title="Criar Tabela" color="" onPress={criarTabela} />
-      <Button title="Abrir Tabela" color="" onPress={readWorkbook} />
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ marginTop: 20 }}>
+        <Button title="Create CSV File" onPress={generateCategoriesFile} />
+      </View>
     </View>
   );
-}
+};
 
-async function criarTabela() {
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet([
-    ["Data", "Dinheiro", "Cartão", "Pix"],
-    ["dia"],
-    ["dia"],
-    ["dia"],
-  ]);
-
-  XLSX.utils.book_append_sheet(wb, ws, "teste.xlsx");
-  const b64 = XLSX.write(wb, { type: "base64", bookType: "xlsx" });
-  /* b64 is a Base64 string */
-  await FileSystem.writeAsStringAsync(
-    FileSystem.documentDirectory + "teste.xlsx",
-    b64,
-    { encoding: FileSystem.EncodingType.Base64 }
-  );
-}
-
-async function readWorkbook() {
-  FileSystem.getContentUriAsync(FileSystem.documentDirectory + "teste.xlsx").then((cUri) => {
-    IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
-      data: cUri,
-      flags: 1,
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-  });
-}
+export default HomeScreen;
