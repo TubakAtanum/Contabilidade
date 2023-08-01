@@ -23,41 +23,46 @@ const AddDataScreen = () => {
         return;
       }
   
-      const newData = `${currentDate},${category},${value}`;
       const fileUri = FileSystem.documentDirectory + 'data.csv';
       const fileContent = await FileSystem.readAsStringAsync(fileUri);
   
       // Split the CSV content into lines
       const lines = fileContent.trim().split('\n');
   
-      // Check if there is an existing entry for the current date and category
-      const existingEntryIndex = lines.findIndex((line) => {
-        const [date, cat] = line.split(',');
-        return date === currentDate && cat === category;
-      });
-  
-      if (existingEntryIndex !== -1) {
-        // If an entry already exists for the current date and category, update its value
-        const existingEntry = lines[existingEntryIndex].split(',');
-        const currentValue = Number(existingEntry[2]);
-        const newValue = currentValue + Number(value);
-        lines[existingEntryIndex] = `${currentDate},${category},${newValue}`;
-      } else {
-        // If no entry exists for the current date and category, add a new entry
-        lines.push(newData);
+      const categories = lines[0].split(',').slice(1);
+      const categoryIndex = categories.indexOf(category);
+      if (categoryIndex === -1) {
+        alert('Selected category not found in CSV file.');
+        return;
       }
   
-      const updatedContent = lines.join('\n');
+      // Find the row for the current date
+      let dataRow = lines.find((line) => line.startsWith(currentDate));
+  
+      if (dataRow) {
+        // If an entry already exists for the current date, update its value
+        const rowData = dataRow.split(',');
+        const currentValue = Number(rowData[categoryIndex+1])
+        rowData[categoryIndex + 1] = currentValue + Number(value); // +1 to skip the date column
+        lines[lines.indexOf(dataRow)] = rowData.join(',');
+      } else {
+        // If no entry exists for the current date, add a new entry
+        const newRow = [currentDate, ...Array(categories.length).fill('0')]; // Create a new row with 0 values for all categories
+        newRow[categoryIndex + 1] = value; // +1 to skip the date column
+        lines.push(newRow.join(','));
+      }
+  
+      const updatedContent = lines.join('\n'); // Join the lines back with a newline
       await FileSystem.writeAsStringAsync(fileUri, updatedContent);
   
       console.log('Updated CSV content:', updatedContent);
-      
+  
       alert('Data appended to CSV file successfully!');
       setValue('');
     } catch (error) {
       console.error('Error appending data to the CSV file:', error);
     }
-  };    
+  }   
 
   // State for managing the list of categories and the new category input
   const [categories, setCategories] = useState([]);
@@ -88,20 +93,39 @@ const AddDataScreen = () => {
           // Add the new category to the list of categories
           const updatedCategories = [...categories, newCategory];
           setCategories(updatedCategories);
-
+  
           // Update the categories.csv file with the new category
           const categoriesFileUri = FileSystem.documentDirectory + 'categories.csv';
           const updatedCategoriesContent = updatedCategories.join(',');
           await FileSystem.writeAsStringAsync(categoriesFileUri, updatedCategoriesContent);
+  
+          // Fetch the data.csv file and append the new category to it
+          const dataFileUri = FileSystem.documentDirectory + 'data.csv';
+          const dataContent = await FileSystem.readAsStringAsync(dataFileUri);
+          const lines = dataContent.trim().split('\n');
+          const headerRow = lines[0].split(','); // Extract the header row
+          const newDataHeader = [...headerRow, newCategory]; // Add the new category to the header
+          const updatedLines = lines.map((line, index) => {
+            if (index === 0) {
+              return newDataHeader.join(','); // Update the header row
+            } else {
+              const rowValues = line.split(',');
+              return [...rowValues, '0'].join(','); // Add default value for the new category in existing rows
+            }
+          });
+          const updatedDataContent = updatedLines.join('\n');
+  
+          await FileSystem.writeAsStringAsync(dataFileUri, updatedDataContent);
+          console.log('Updated data.csv content:', updatedDataContent);
         }
-
+  
         // Close the modal and reset the newCategory state
         setShowModal(false);
         setNewCategory('');
-
+  
         // Fetch the updated categories from categories.csv after adding a new category
         fetchCategories(); // Call the fetchCategories function here
-
+  
         const categoriesFileUri = FileSystem.documentDirectory + 'categories.csv';
         const updatedCategoriesContent = await FileSystem.readAsStringAsync(categoriesFileUri);
         console.log('Updated categories.csv content:', updatedCategoriesContent);
@@ -110,6 +134,7 @@ const AddDataScreen = () => {
       }
     }
   };
+  
 
   // Fetch the initial categories from categories.csv when the component mounts
   useEffect(() => {
