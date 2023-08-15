@@ -16,21 +16,12 @@ const AddDataScreen = () => {
   const appendToCSVFile = async () => {
     try {
       const currentDate = getCurrentDate();
-  
-      // Check if value is not empty and is a number
-      if (!value || isNaN(value)) {
-        alert('Please enter a valid numeric value.');
-        return;
-      }
-  
       const fileUri = FileSystem.documentDirectory + 'data.csv';
       const fileContent = await FileSystem.readAsStringAsync(fileUri);
-  
-      // Split the CSV content into lines
       const lines = fileContent.trim().split('\n');
-  
       const categories = lines[0].split(',').slice(1);
       const categoryIndex = categories.indexOf(category);
+      
       if (categoryIndex === -1) {
         alert('Selected category not found in CSV file.');
         return;
@@ -68,6 +59,11 @@ const AddDataScreen = () => {
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState('');
   const [showModal, setShowModal] = useState(false);
+
+  // Fetch the initial categories from categories.csv when the component mounts
+  useEffect(() => {
+    fetchCategories(); // Call the fetchCategories function here
+  }, []);
 
   // Function to fetch the categories from categories.csv
   const fetchCategories = async () => {
@@ -124,7 +120,7 @@ const AddDataScreen = () => {
         setNewCategory('');
   
         // Fetch the updated categories from categories.csv after adding a new category
-        fetchCategories(); // Call the fetchCategories function here
+        fetchCategories(); 
   
         const categoriesFileUri = FileSystem.documentDirectory + 'categories.csv';
         const updatedCategoriesContent = await FileSystem.readAsStringAsync(categoriesFileUri);
@@ -134,12 +130,6 @@ const AddDataScreen = () => {
       }
     }
   };
-  
-
-  // Fetch the initial categories from categories.csv when the component mounts
-  useEffect(() => {
-    fetchCategories(); // Call the fetchCategories function here
-  }, []);
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -153,18 +143,18 @@ const AddDataScreen = () => {
         ))}
       </Picker>
       <TextInput
-        placeholder="Value"
+        placeholder="Digite o Valor"
         value={value}
-        onChangeText={(text) => setValue(text.replace(/[^0-9]/g, ''))}
+        onChangeText={(text) => setValue(text)}
         keyboardType="numeric"
         style={{ borderWidth: 1, padding: 10, marginBottom: 10, width: 200 }}
       />
-      <Button title="Append to CSV" onPress={appendToCSVFile} />
+      <Button title="Adicionar" onPress={appendToCSVFile} />
 
       <Modal visible={showModal} animationType="slide">
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <TextInput
-            placeholder="New Category"
+            placeholder="Nova Categoria"
             value={newCategory}
             onChangeText={(text) => setNewCategory(text)}
             style={{ borderWidth: 1, padding: 10, marginBottom: 10, width: 200 }}
