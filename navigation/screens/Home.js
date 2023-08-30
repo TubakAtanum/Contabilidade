@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, Button } from "react-native";
 import * as FileSystem from "expo-file-system";
+import * as SQLite from 'expo-sqlite'
 import { getCurrentDate } from "./CreateCSV";
 
 const HomeScreen = ({ navigation }) => {
@@ -8,7 +9,7 @@ const HomeScreen = ({ navigation }) => {
     try {
       // Create the categories.csv file with initial categories
       const categories = ["Pix", "Dinheiro", "Cartão"];
-      const categoriesContent = categories.join(",");
+      const categoriesContent = categories.join(";");
       const categoriesFileUri = FileSystem.documentDirectory + "categories.csv";
       await FileSystem.writeAsStringAsync(categoriesFileUri, categoriesContent);
       console.log("Cat:",categoriesContent)    
@@ -24,22 +25,21 @@ const HomeScreen = ({ navigation }) => {
 
   const createCSVFile = async () => {
     try {
-      const csvContent = "Date,Category,Value\n";
       const fileUri = FileSystem.documentDirectory + "data.csv";
 
       // Read categories from the categories.csv file
       const categoriesFileUri = FileSystem.documentDirectory + "categories.csv";
       const categoriesContent = await FileSystem.readAsStringAsync(
         categoriesFileUri);
-      const categories = categoriesContent.split(",");
+      const categories = categoriesContent.split(";");
 
       // Create the header row
-      const headerRow = ["Date", ...categories].join(",");
+      const headerRow = ["Date", ...categories].join(";");
 
       // Create initial entries with the current date and zeros for each category
       const currentDate = getCurrentDate();
       const initialValues = [currentDate, ...categories.map(() => "0")].join(
-        ","
+        ";"
       );
 
       const initialContent = `${headerRow}\n${initialValues}\n`;
