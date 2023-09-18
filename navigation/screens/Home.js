@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Button, FlatList } from "react-native";
 import * as FileSystem from "expo-file-system";
-import * as SQLite from "expo-sqlite";
-import { getCurrentDate } from "./CreateCSV";
+import { db, tableName, getCurrentDate } from "../sqlite/utils";
 
-const HomeScreen = ({ navigation }) => {
-  const db = SQLite.openDatabase("tabela.db");
+const HomeScreen = () => {
   const dbPath = `${FileSystem.documentDirectory}/SQLite/tabela.db`;
   const currentDate = getCurrentDate();
 
@@ -13,7 +11,7 @@ const HomeScreen = ({ navigation }) => {
     try {
       db.transaction(async (tx) => {
         tx.executeSql(`
-          CREATE TABLE IF NOT EXISTS tabela (
+          CREATE TABLE IF NOT EXISTS ${tableName} (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             Date TEXT,
             Pix REAL DEFAULT '0',
@@ -21,7 +19,6 @@ const HomeScreen = ({ navigation }) => {
             Cartao REAL DEFAULT '0'
           );
         `);
-        // Insert initial entry with zeros for each category
         tx.executeSql(`INSERT INTO tabela (Date) VALUES (?)`, [currentDate]);
       });
 
@@ -34,7 +31,7 @@ const HomeScreen = ({ navigation }) => {
   const populateDB = () => {
     db.transaction((tx) => {
       tx.executeSql(
-        `INSERT INTO tabela (Date, Pix, Dinheiro, Cartao) VALUES (?, ?, ?, ?)`,
+        `INSERT INTO ${tableName} (Date, Pix, Dinheiro, Cartao) VALUES (?, ?, ?, ?)`,
         [currentDate, 100, 200, 300],
         (_, result) => {
           console.log(result);

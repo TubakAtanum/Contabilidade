@@ -17,13 +17,13 @@ const DataGrid = ({ csv }) => {
       backgroundColor: "rgb(169, 208, 142)",
       borderWidth: 1,
       borderColor: "black",
-      width: 100,
+      width: 50,
     },
     dateCell: {
       borderWidth: 1,
       borderColor: "black",
       paddingHorizontal: "1%",
-      width: 100,
+      width: 50,
     },
     valuesCell: {
       borderWidth: 1,

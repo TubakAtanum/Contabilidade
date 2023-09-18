@@ -1,18 +1,19 @@
 import React, { useState, useCallback } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import * as SQLite from "expo-sqlite";
+import { db, tableName } from "../sqlite/utils";
+import { ScrollView } from "react-native-gesture-handler";
+import FabButton from "./FabButton";
 
 export default function ExtratoScreen() {
   const [headerData, setHeaderData] = useState([]);
   const [data, setData] = useState([]);
-  const db = SQLite.openDatabase("tabela.db");
 
   const getTableHeaders = () => {
     return new Promise((resolve, reject) => {
       db.transaction((tx) => {
         tx.executeSql(
-          "SELECT * FROM tabela",
+          `SELECT * FROM ${tableName}`,
           [],
           (_, result) => {
             const rows = result.rows;
@@ -42,6 +43,7 @@ export default function ExtratoScreen() {
         .then(({ columnNames, tableData }) => {
           setHeaderData(columnNames);
           setData(tableData);
+          console.log(tableData, columnNames);
         })
         .catch((error) => {
           console.error(error);
@@ -51,48 +53,102 @@ export default function ExtratoScreen() {
 
   return (
     <View>
-      <View style={styles.headerRow}>
-        {headerData.map((header, index) => (
-          <Text key={index} style={styles.headerCell}>
-            {header}
-          </Text>
-        ))}
-      </View>
+      <ScrollView horizontal={true}>
+        <ScrollView>
+          <View key="table">
+            <View key="headers" style={{ flexDirection: "row" }}>
+              {headerData.slice(0, 1).map((date, index) => (
+                <View key={date} style={styles.monthHeader}>
+                  <Text
+                    key={index}
+                    style={{ color: "black", textAlign: "center" }}
+                  >
+                    {date}
+                  </Text>
+                </View>
+              ))}
+              {headerData.slice(1).map((headers, index) => (
+                <View key={headers} style={styles.catHeader}>
+                  <Text
+                    key={index}
+                    style={{ color: "black", textAlign: "center" }}
+                  >
+                    {headers}
+                  </Text>
+                </View>
+              ))}
+            </View>
 
-      {data.map((rowData, rowIndex) => (
-        <View key={rowIndex} style={styles.dataRow}>
-          {rowData.map((cellData, cellIndex) => (
-            <Text key={cellIndex} style={styles.dataCell}>
-              {cellData}
-            </Text>
-          ))}
-        </View>
-      ))}
+            <View key="body" style={{ flexDirection: "column" }}>
+              {data.map((row, rowIndex) => (
+                <View
+                  key={`row${rowIndex}`}
+                  style={[
+                    { flexDirection: "row" },
+                    rowIndex % 2 === 0 ? {} : styles.oddRow,
+                  ]}
+                >
+                  {row.slice(0, 1).map((dateName) => (
+                    <View key={dateName} style={styles.dateCell}>
+                      <Text style={{ textAlign: "center" }}>{dateName}</Text>
+                    </View>
+                  ))}
+                  {row.slice(1).map((values, valuesIndex) => {
+                    const strValue = values.toString();
+                    const text =
+                      strValue.length >= 3
+                        ? strValue.substring(0, strValue.length - 2) +
+                          "," +
+                          strValue.substring(
+                            strValue.length - 2,
+                            strValue.length
+                          )
+                        : values;
+                    return (
+                      <View key={valuesIndex} style={styles.valuesCell}>
+                        <Text style={{ textAlign: "center" }}>
+                          {"R$" + text}
+                        </Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              ))}
+            </View>
+          </View>
+        </ScrollView>
+      </ScrollView>
+      <FabButton style={{bottom: 80}} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  headerRow: {
-    flexDirection: "row",
-    backgroundColor: "lightgray",
-  },
-  headerCell: {
-    flex: 1,
-    padding: 10,
-    fontWeight: "bold",
+  monthHeader: {
+    backgroundColor: "rgb(169, 208, 142)",
     borderWidth: 1,
-    borderColor: "gray",
+    borderColor: "black",
+    width: 100,
   },
-  dataRow: {
-    flexDirection: "row",
-  },
-  dataCell: {
-    flex: 1,
-    padding: 10,
+  catHeader: {
+    backgroundColor: "rgb(169, 208, 142)",
     borderWidth: 1,
-    borderColor: "gray",
+    borderColor: "black",
+    width: 100,
+  },
+  dateCell: {
+    borderWidth: 1,
+    borderColor: "black",
+    paddingHorizontal: "1%",
+    width: 100,
+  },
+  valuesCell: {
+    borderWidth: 1,
+    borderColor: "black",
+    paddingHorizontal: "1%",
+    width: 100,
+  },
+  oddRow: {
+    backgroundColor: "lightgrey",
   },
 });
-
-//<Text>{`${item.Date} - Pix: ${item.Pix}, Dinheiro: ${item.Dinheiro}, Cartão: ${item.Cartao}`}</Text>
