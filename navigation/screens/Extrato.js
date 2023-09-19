@@ -43,7 +43,6 @@ export default function ExtratoScreen() {
         .then(({ columnNames, tableData }) => {
           setHeaderData(columnNames);
           setData(tableData);
-          console.log(tableData, columnNames);
         })
         .catch((error) => {
           console.error(error);
@@ -52,74 +51,75 @@ export default function ExtratoScreen() {
   );
 
   return (
-    <View>
-      <ScrollView horizontal={true}>
-        <ScrollView>
-          <View key="table">
-            <View key="headers" style={{ flexDirection: "row" }}>
-              {headerData.slice(0, 1).map((date, index) => (
-                <View key={date} style={styles.monthHeader}>
-                  <Text
-                    key={index}
-                    style={{ color: "black", textAlign: "center" }}
-                  >
-                    {date}
-                  </Text>
-                </View>
-              ))}
-              {headerData.slice(1).map((headers, index) => (
-                <View key={headers} style={styles.catHeader}>
-                  <Text
-                    key={index}
-                    style={{ color: "black", textAlign: "center" }}
-                  >
-                    {headers}
-                  </Text>
-                </View>
-              ))}
-            </View>
-
-            <View key="body" style={{ flexDirection: "column" }}>
-              {data.map((row, rowIndex) => (
-                <View
-                  key={`row${rowIndex}`}
-                  style={[
-                    { flexDirection: "row" },
-                    rowIndex % 2 === 0 ? {} : styles.oddRow,
-                  ]}
+    <ScrollView horizontal={true}>
+      <ScrollView>
+        <View key="table">
+          <View key="headers" style={{ flexDirection: "row" }}>
+            {headerData.slice(0, 1).map((date, index) => (
+              <View key={date} style={styles.monthHeader}>
+                <Text
+                  key={index}
+                  style={{ color: "black", textAlign: "center" }}
                 >
-                  {row.slice(0, 1).map((dateName) => (
-                    <View key={dateName} style={styles.dateCell}>
-                      <Text style={{ textAlign: "center" }}>{dateName}</Text>
-                    </View>
-                  ))}
-                  {row.slice(1).map((values, valuesIndex) => {
-                    const strValue = values.toString();
-                    const text =
-                      strValue.length >= 3
-                        ? strValue.substring(0, strValue.length - 2) +
-                          "," +
-                          strValue.substring(
-                            strValue.length - 2,
-                            strValue.length
-                          )
-                        : values;
-                    return (
-                      <View key={valuesIndex} style={styles.valuesCell}>
-                        <Text style={{ textAlign: "center" }}>
-                          {"R$" + text}
-                        </Text>
-                      </View>
-                    );
-                  })}
-                </View>
-              ))}
-            </View>
+                  {date}
+                </Text>
+              </View>
+            ))}
+            {headerData.slice(1).map((headers, index) => (
+              <View key={headers} style={styles.catHeader}>
+                <Text
+                  key={index}
+                  style={{ color: "black", textAlign: "center" }}
+                >
+                  {headers}
+                </Text>
+              </View>
+            ))}
           </View>
-        </ScrollView>
+
+          <View key="body" style={{ flexDirection: "column" }}>
+            {data.map((row, rowIndex) => (
+              <View
+                key={`row${rowIndex}`}
+                style={[
+                  { flexDirection: "row" },
+                  rowIndex % 2 === 0 ? {} : styles.oddRow,
+                ]}
+              >
+                {row.slice(0, 1).map((dateName) => (
+                  <View key={dateName} style={styles.dateCell}>
+                    <Text style={{ textAlign: "center" }}>{dateName}</Text>
+                  </View>
+                ))}
+                {row.slice(1).map((values, valuesIndex) => {
+                  const strValue = values.toString();
+                  const text =
+                    strValue.length >= 6
+                      ? strValue.substring(0, strValue.length - 5) +
+                        "." +
+                        strValue.substring(
+                          strValue.length - 5,
+                          strValue.length - 2
+                        ) +
+                        "," +
+                        strValue.substring(strValue.length - 2, strValue.length)
+                      : (strValue.length <= 5) & (strValue.length >= 3)
+                      ? strValue.substring(0, strValue.length - 2) +
+                        "," +
+                        strValue.substring(strValue.length - 2, strValue.length)
+                      : "0," + values;
+                  return (
+                    <View key={valuesIndex} style={styles.valuesCell}>
+                      <Text style={{ textAlign: "center" }}>{"R$" + text}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            ))}
+          </View>
+        </View>
       </ScrollView>
-      <FabButton style={{bottom: 80}} />
-    </View>
+    </ScrollView>
   );
 }
 

@@ -21,7 +21,7 @@ const AddDataScreen = () => {
   const lastDate = getLastDate(tableName);
 
   const valueRef = useRef(null);
-  const unmasked = value.replace(/[^0-9]+/g, "");
+  const unmasked = parseInt(value.replace(/[^0-9]+/g, ""));
 
   useEffect(() => {
     db.transaction((tx) => {
@@ -70,7 +70,14 @@ const AddDataScreen = () => {
         title="Adicionar"
         onPress={() => {
           getCurrentValue(category, tableName).then((currValue) =>
-            appendToDB(currentDate, lastDate, tableName, category, unmasked, currValue)
+            appendToDB(
+              currentDate,
+              lastDate,
+              tableName,
+              category,
+              unmasked,
+              currValue
+            )
           );
         }}
       />
@@ -114,13 +121,14 @@ const appendToDB = async (
 ) => {
   if (currentDate == (await lastDate)) {
     try {
-      console.log(JSON.stringify(getCurValue))
       db.transaction((tx) => {
         tx.executeSql(
           `UPDATE ${tableName} SET ${category} = ?`,
           [getCurValue[category] + value],
           (_, result) => {
-            console.log(`Updated`, JSON.stringify(lastDate));
+            console.log(
+              `Updated ${category} to ${getCurValue[category] + value}`
+            );
           },
           (_, error) => {
             console.log(error);
@@ -137,10 +145,7 @@ const appendToDB = async (
           `INSERT INTO ${tableName} (Date, ${category}) VALUES (?, ?)`,
           [currentDate, value],
           (_, result) => {
-            console.log(
-              `Inserted ${value} into ${category}`,
-              JSON.stringify(lastDate)
-            );
+            console.log(`Inserted ${value} into ${category}`);
           },
           (_, error) => {
             console.error("Error inserting row:", error);
