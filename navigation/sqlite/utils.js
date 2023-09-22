@@ -47,3 +47,31 @@ export const getLastDate = (tableName) => {
     });
   });
 };
+
+export const getTableHeaders = (db, tableName) => {
+  return new Promise((resolve, reject) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        `SELECT * FROM ${tableName}`,
+        [],
+        (_, result) => {
+          const rows = result.rows;
+          const columnNames = Object.keys(rows.item(0)).slice(1);
+          const tableData = [];
+
+          for (let i = 0; i < rows.length; i++) {
+            const rowData = [];
+            for (let j = 0; j < columnNames.length; j++) {
+              rowData.push(rows.item(i)[columnNames[j]]);
+            }
+            tableData.push(rowData);
+          }
+          resolve({ columnNames, tableData });
+        },
+        (_, error) => {
+          reject(error);
+        }
+      );
+    });
+  });
+};

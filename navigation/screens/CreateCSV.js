@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { View, TextInput, Button, Modal } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { TextInputMask } from "react-native-masked-text";
@@ -23,22 +24,24 @@ const AddDataScreen = () => {
   const valueRef = useRef(null);
   const unmasked = parseInt(value.replace(/[^0-9]+/g, ""));
 
-  useEffect(() => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `SELECT * FROM ${tableName} LIMIT 1`,
-        [],
-        (_, result) => {
-          const rows = result.rows;
-          const columnNames = Object.keys(rows.item(0)).slice(2);
-          setPickerCategories(columnNames);
-        },
-        (_, error) => {
-          console.log(error);
-        }
-      );
-    });
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      db.transaction((tx) => {
+        tx.executeSql(
+          `SELECT * FROM ${tableName} LIMIT 1`,
+          [],
+          (_, result) => {
+            const rows = result.rows;
+            const columnNames = Object.keys(rows.item(0)).slice(2);
+            setPickerCategories(columnNames);
+          },
+          (_, error) => {
+            console.log(error);
+          }
+        );
+      });
+    })
+  );
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -81,7 +84,6 @@ const AddDataScreen = () => {
           );
         }}
       />
-
       <Modal visible={showModal} animationType="slide">
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}

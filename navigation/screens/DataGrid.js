@@ -1,11 +1,22 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
 
-const DataGrid = ({ csv }) => {
-  if (!csv) {
-    return null;
-  }
-  
+const DataGrid = ({ header, body }) => {
+  const [longest, setLongest] = useState(50);
+
+  useEffect(() => {
+    const getLongest = (header) => {
+      const arrLenght = [];
+      header.forEach((content) => {
+        arrLenght.push(content.length);
+      });
+      return arrLenght.reduce((acc, current) => {
+        return current > acc ? current : acc ;
+      }, 0);
+    };
+    setLongest(getLongest(header));
+  }, []);
+
   const styles = StyleSheet.create({
     monthHeader: {
       backgroundColor: "rgb(169, 208, 142)",
@@ -17,19 +28,19 @@ const DataGrid = ({ csv }) => {
       backgroundColor: "rgb(169, 208, 142)",
       borderWidth: 1,
       borderColor: "black",
-      width: 50,
+      width: longest * 12,
     },
     dateCell: {
       borderWidth: 1,
       borderColor: "black",
       paddingHorizontal: "1%",
-      width: 50,
+      width: 100,
     },
     valuesCell: {
       borderWidth: 1,
       borderColor: "black",
       paddingHorizontal: "1%",
-      width: 100,
+      width: longest * 12,
     },
     oddRow: {
       backgroundColor: "lightgrey",
@@ -38,27 +49,27 @@ const DataGrid = ({ csv }) => {
 
   return (
     <View key="table">
-      <View key="header" style={{ flexDirection: "row" }}>
-        {csv.header.slice(0, 1).map((dateName) => (
-          <View key={dateName} style={styles.monthHeader}>
-            <Text style={{ color: "black", textAlign: "center" }}>
-              {dateName}
+      <View key="headers" style={{ flexDirection: "row" }}>
+        {header.slice(0, 1).map((date, index) => (
+          <View key={date} style={styles.monthHeader}>
+            <Text key={index} style={{ color: "black", textAlign: "center" }}>
+              {date}
             </Text>
           </View>
         ))}
-        {csv.header.slice(1).map((headerName) => (
-          <View key={headerName} style={styles.catHeader}>
-            <Text style={{ color: "black", textAlign: "center" }}>
-              {headerName}
+        {header.slice(1).map((headers, index) => (
+          <View key={headers} style={styles.catHeader}>
+            <Text key={index} style={{ color: "black", textAlign: "center" }}>
+              {headers}
             </Text>
           </View>
         ))}
       </View>
 
-      <View key="content" style={{ flexDirection: "column" }}>
-        {csv.data.map((row, rowIndex) => (
+      <View key="body" style={{ flexDirection: "column" }}>
+        {body.map((row, rowIndex) => (
           <View
-            key={`row-${rowIndex}`}
+            key={`row${rowIndex}`}
             style={[
               { flexDirection: "row" },
               rowIndex % 2 === 0 ? {} : styles.oddRow,
@@ -69,17 +80,26 @@ const DataGrid = ({ csv }) => {
                 <Text style={{ textAlign: "center" }}>{dateName}</Text>
               </View>
             ))}
-            {row.slice(1).map((column, columnIndex) => {
+            {row.slice(1).map((values, valuesIndex) => {
+              const strValue = values.toString();
+              const text =
+                strValue.length >= 6
+                  ? strValue.substring(0, strValue.length - 5) +
+                    "." +
+                    strValue.substring(
+                      strValue.length - 5,
+                      strValue.length - 2
+                    ) +
+                    "," +
+                    strValue.substring(strValue.length - 2, strValue.length)
+                  : (strValue.length <= 5) & (strValue.length >= 3)
+                  ? strValue.substring(0, strValue.length - 2) +
+                    "," +
+                    strValue.substring(strValue.length - 2, strValue.length)
+                  : "0," + values;
               return (
-                <View key={columnIndex} style={styles.valuesCell}>
-                  <Text style={{ textAlign: "center" }}>
-                    {"R$" +
-                      (column.length >= 3
-                        ? column.substring(0, column.length - 2) +
-                          "," +
-                          column.substring(column.length - 2, column.length)
-                        : column)}
-                  </Text>
+                <View key={valuesIndex} style={styles.valuesCell}>
+                  <Text style={{ textAlign: "center" }}>{"R$" + text}</Text>
                 </View>
               );
             })}

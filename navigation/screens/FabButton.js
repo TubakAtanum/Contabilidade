@@ -15,7 +15,7 @@ export default FabButton = ({ onPress, iconName }) => {
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    position: "absolute",
+    position: 'absolute',
     bottom: 80,
     right: 50,
   },
@@ -23,15 +23,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgb(169, 208, 142)",
     width: 60,
     height: 60,
-    position: "absolute",
+    position: 'absolute',
     borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
-    shadowRadius: 10,
-    shadowColor: "#00213b",
-    shadowOpacity: 0.3,
-    textShadowOffset: {
-      height: 10,
-    },
   },
 });
