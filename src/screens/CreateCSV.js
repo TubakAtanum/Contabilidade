@@ -9,7 +9,7 @@ import {
   getCurrentDate,
   getCurrentValue,
   getLastDate,
-} from "../sqlite/utils";
+} from "../utils/SQLite";
 
 const AddDataScreen = () => {
   const [category, setCategory] = useState("Pix"); // Default category is 'Pix'

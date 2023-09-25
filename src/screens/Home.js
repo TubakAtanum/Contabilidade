@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Button, FlatList } from "react-native";
 import * as FileSystem from "expo-file-system";
-import { db, tableName, getCurrentDate } from "../sqlite/utils";
+import { db, tableName, getCurrentDate } from "../utils/SQLite";
 
 const HomeScreen = () => {
   const dbPath = `${FileSystem.documentDirectory}/SQLite/tabela.db`;

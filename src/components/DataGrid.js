@@ -15,6 +15,7 @@ const DataGrid = ({ header, body }) => {
       }, 0);
     };
     setLongest(getLongest(header));
+    console.log(longest)
   }, []);
 
   const styles = StyleSheet.create({

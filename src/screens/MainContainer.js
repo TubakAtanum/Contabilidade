@@ -2,11 +2,9 @@ import * as React from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Ionicons from 'react-native-vector-icons/Ionicons'
-
-// Screens
-import HomeScreen from './screens/Home'
-import AddDataScreen from './screens/CreateCSV'
-import ExtratoScreen from './screens/Extrato'
+import HomeScreen from './Home'
+import AddDataScreen from './CreateCSV'
+import ExtratoScreen from './Extrato'
 
 //SCR Names
 const homeName = 'Home'
