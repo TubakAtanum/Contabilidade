@@ -9,9 +9,9 @@ import {
   getCurrentDate,
   getCurrentValue,
   getLastDate,
-} from "../utils/SQLite";
+} from "../../utils/SQLite";
 
-const AddDataScreen = () => {
+export default function Edit() {
   const [category, setCategory] = useState("Pix"); // Default category is 'Pix'
   const [value, setValue] = useState("");
   const [pickerCategories, setPickerCategories] = useState([]);
@@ -174,5 +174,3 @@ const handleAddCategory = async (tableName, newCategory) => {
     );
   });
 };
-
-export default AddDataScreen;

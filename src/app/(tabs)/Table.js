@@ -1,13 +1,13 @@
 import React, { useState, useCallback } from "react";
 import { View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { db, tableName, getTableHeaders } from "../utils/SQLite";
+import { db, tableName, getTableHeaders } from "../../utils/SQLite";
 import { ScrollView } from "react-native-gesture-handler";
-import FabButton from "../components/FabButton";
+import FabButton from "../../components/FabButton";
 import * as ScreenOrientation from "expo-screen-orientation";
-import DataGrid from "../components/DataGrid";
+import DataGrid from "../../components/DataGrid";
 
-export default function ExtratoScreen() {
+export default function Table() {
   const [headerData, setHeaderData] = useState([]);
   const [data, setData] = useState([]);
   const [isRotated, setIsRotated] = useState(false);
